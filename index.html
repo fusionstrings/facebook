@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta property="fb:app_id" content="516796998433208" />
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic|Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/style.css">
 
 </head>
@@ -14,33 +15,45 @@
 <body>
     <div id="fb-root"></div>
     <section class="container" id="form-container">
-        <h1>Facebook search</h1>
-        <div class="fb-like" data-href="//facebook.fusionstrings.com" data-layout="standard" data-action="like" data-show-faces="false" data-share="false"></div>
-        <div class="fb-login-button" id="fb-login-button" data-scope="publish_actions" data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="true"></div>
-        <button type="button" class="btn btn-default" onclick="authUser()">Login</button>
-        <hr />
-        <form class="form-inline" role="form" id="search-form">
-            <div class="input-group">
-                <input type="search" class="form-control" id="searchtext" placeholder="Search facebook pages" autofocus>
-                <span class="input-group-btn">
-                    <button class="btn btn-default" type="submit">Go!</button>
-                </span>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+
+        		<div class="row">
+            		<div class="col-md-8">
+	                	<h1>Facebook search</h1>
+	                </div>
+            		<div class="col-md-4">
+	                	<button type="button" id="fb-custom-login-button" class="btn btn-default" onclick="authUser()">Login</button>
+	                </div>
+                </div>
+
+                <p class="alert alert-warning" id="login-warning">Please <strong>login</strong> to initiate search</p>
+                <form class="form-inline" role="form" id="search-form">
+                    <hr />
+                    <div class="input-group">
+                     	<span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                        <input type="search" class="form-control" id="searchtext" placeholder="Search facebook pages" autofocus>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">Go!</button>
+                        </span>
+                    </div>
+                    <hr />
+                </form>
             </div>
-        </form>
-        <hr />
-    </section>
-
-    <section class="container">
-        <div id="spinner" class="spinner">
-            <div class="rect1"></div>
-            <div class="rect2"></div>
-            <div class="rect3"></div>
-            <div class="rect4"></div>
-            <div class="rect5"></div>
         </div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+		        <div id="spinner" class="spinner">
+		            <div class="rect1"></div>
+		            <div class="rect2"></div>
+		            <div class="rect3"></div>
+		            <div class="rect4"></div>
+		            <div class="rect5"></div>
+		        </div>
+            </div>
+        </div>
+        <div class="row" id="search-result"></div>
     </section>
-
-    <section class="container" id="search-result"></section>
 
     <script src="scripts/main.js"></script>
 </body>

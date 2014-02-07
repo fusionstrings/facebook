@@ -29,7 +29,9 @@ window.fbAsyncInit = function() {
 var spinner = document.getElementById('spinner');
 var searchResult = document.getElementById('search-result');
 var fbLoginButton = document.getElementById('fb-login-button');
+var fbCustomLoginButton = document.getElementById('fb-custom-login-button');
 var searchForm = document.getElementById('search-form');
+var loginWarning = document.getElementById('login-warning');
 spinner.style.display = 'none';
 searchResult.style.display = 'none';
 searchForm.style.display = 'none';
@@ -43,16 +45,29 @@ function authUser() {
     FB.login(checkLoginStatus);
 }
 
+function logoutUser() {
+    FB.logout(checkLoginStatus);
+}
+
 var checkLoginStatus = function(response) {
+    console.log('response: ' + response.status);
     if (response && response.status == 'connected') {
         console.log('User is authorized');
 
-
+        fbCustomLoginButton.innerHTML = 'Logout';
+        fbCustomLoginButton.setAttribute('onclick', 'logoutUser()');
         searchForm.style.display = '';
+        loginWarning.style.display = 'none';
+        fbCustomLoginButton.style.display = '';
 
         // Now Personalize the User Experience
         console.log('response: ' + JSON.stringify(response));
     } else {
+        searchForm.style.display = 'none';
+        loginWarning.style.display = '';
+        fbCustomLoginButton.innerHTML = 'Login';
+        fbCustomLoginButton.setAttribute('onclick', 'authUser()');
+        fbCustomLoginButton.style.display = '';
         console.log('User is not authorized');
         console.log('response: ' + response.status);
     }
@@ -78,12 +93,6 @@ var find = function() {
     }, function(response) {
         console.log(response);
         response.data.sort(sortByName);
-
-        //var jsonResult = document.createElement('pre');
-        //jsonResult.innerHTML = JSON.stringify(response, undefined, 2);
-
-        //spinner.style.display = 'none';
-        //document.getElementById('form-container').appendChild(jsonResult);
         buildDom(response);
     });
 }
@@ -94,119 +103,66 @@ var buildDom = function(searchresult) {
         for (var i = 0, len = arrData.length; i < len; i++) {
             //console.log('(arrData[i])', (arrData[i]));
             var page = document.createElement('article');
-            var h2 = document.createElement('h2');
-            var link = document.createElement('a');
-            link.href = '//facebook.com/' + arrData[i].id;
-            link.innerHTML = arrData[i].name;
-
-            var moreButton = document.createElement('button');
-            moreButton.setAttribute('class', 'btn btn-default');
-            moreButton.setAttribute('type', 'button');
-            moreButton.innerHTML = 'Know more';
-            moreButton.setAttribute('onclick', 'getDetail(' + arrData[i].id + ')');
-
-            h2.appendChild(link);
-            page.appendChild(h2);
-            page.appendChild(moreButton);
             page.setAttribute('id', 'page_' + arrData[i].id);
+            page.setAttribute('class', 'col-md-4 media');
+            var innerHtml = '<a class="pull-left" href="//facebook.com/' + arrData[i].id + '"><img class="media-object" src="' + getPicture(arrData[i].id) + '" /></a>' +
+                '<h4><a href="//facebook.com/' + arrData[i].id + '">' + arrData[i].name + '</a></h4>' +
+                '<button class="btn btn-default btn-xs" type="button" onclick="getDetail(' + arrData[i].id + ', this)"><span class="glyphicon glyphicon-plus"></span> Know more</button>';
+            page.innerHTML = innerHtml;
             searchResult.appendChild(page);
-
             spinner.style.display = 'none';
             searchResult.style.display = '';
         }
     } else {
         searchResult.innerHTML = '<strong>No matching results found...</strong>';
-
         spinner.style.display = 'none';
-
         searchResult.style.display = '';
     }
+
+    page.innerHTML += '<ul class="pager">' +
+        '<li class="previous disabled"><a href="#">&larr; Older</a></li>' +
+        '<li class="next"><a href="#">Newer &rarr;</a></li>' +
+        '</ul>';
 }
 
-var getDetail = function(pageId) {
+var getPicture = function(pageId) {
+    FB.api(
+        "/" + pageId + "/picture", {
+            "redirect": false,
+            "height": "200",
+            "type": "normal",
+            "width": "200"
+        },
+        function(response) {
+            console.log("picture" + JSON.stringify(response));
+            if (response && !response.error) {
+                /* handle the result */
+                return response.data.url;
+            }
+        }
+    );
+}
+
+var getDetail = function(pageId, elem) {
     console.log('pageId', pageId);
     FB.api("/" + pageId, {
         'access_token': ''
     }, function(response) {
         if (response && !response.error) {
+            elem.style.display = 'none';
             /* handle the result */
             console.log("details", response);
             var pageArticle = document.getElementById('page_' + pageId);
+            var innerHtml = '';
             if (response.about && response.about !== undefined) {
-                var details = document.createElement('p');
-                details.innerHTML = response.about;
-                pageArticle.appendChild(details);
+                innerHtml += '<p>' + response.about + '</p>';
             }
             if (response.likes && response.likes !== undefined) {
-                var likes = document.createElement('p');
-                likes.innerHTML = '<h3>Likes: ' + response.likes + '</h3>';
-                pageArticle.appendChild(likes);
+                innerHtml += '<p>' + response.likes + '</p>';
             }
-            pageArticle.innerHTML += '<fb:like href="https://www.facebook.com/' + pageId + '" layout="standard" action="like" show_faces="false" share="false"></fb:like>'
+            innerHtml += '<fb:like href="https://www.facebook.com/' + pageId + '" layout="standard" action="like" show_faces="false" share="false"></fb:like>';
+            pageArticle.innerHTML += innerHtml;
             FB.XFBML.parse(pageArticle);
-            /*FB.api(
-                "/me/likes/" + pageId, {
-                    'access_token': ''
-                }, function(response) {
-                    if (response && !response.error) {
-                        //handle the result
-                        console.log("/me/likes", response, "isempt", response.data.length);
-                        var fbLikeButton = document.createElement('button');
-                        fbLikeButton.setAttribute('class', 'btn btn-default');
-                        fbLikeButton.setAttribute('type', 'button');
-                        pageArticle.appendChild(fbLikeButton);
-
-                        if (response.data.length < 1) {
-                            fbLikeButton.innerHTML = 'Like';
-                            fbLikeButton.setAttribute('onclick', 'likeToggle(' + pageId + ')');
-
-                        } else {
-                            fbLikeButton.innerHTML = 'Unlike';
-                            fbLikeButton.setAttribute('onclick', 'likeToggle(' + pageId + ', "DELETE")');
-
-                        }
-                    }
-                }
-            );*/
-
-            FB.api({
-                method: 'pages.isFan',
-                page_id: pageId
-            }, function(resp) {
-                var fbLikeButton = document.createElement('div');
-                fbLikeButton.setAttribute('class', 'fb-like');
-                fbLikeButton.setAttribute('data-href', 'https://www.facebook.com/' + pageId);
-                fbLikeButton.setAttribute('data-layout', 'standard');
-                fbLikeButton.setAttribute('data-action', 'like');
-                fbLikeButton.setAttribute('data-show-faces', 'false');
-                fbLikeButton.setAttribute('data-share', 'false');
-                pageArticle.appendChild(fbLikeButton);
-                /*
-                if (resp) {
-                    console.log('You like the Application.');
-                    fbLikeButton.innerHTML = 'Unlike';
-                    fbLikeButton.setAttribute('onclick', 'likeToggle(' + pageId + ', "DELETE")');
-                } else {
-                    console.log("You don't like the Application.");
-                    fbLikeButton.innerHTML = 'Like';
-                    fbLikeButton.setAttribute('onclick', 'likeToggle(' + pageId + ')');
-                }
-                */
-            });
         }
     });
-}
-
-var likeToggle = function(pageId) {
-    FB.api(
-        "/" + pageId + "/likes",
-        "POST", {
-            'access_token': ''
-        }, function(response) {
-            //if (response && !response.error) {
-            /* handle the result */
-            console.log("like result", response);
-            //}
-        }
-    );
 }
