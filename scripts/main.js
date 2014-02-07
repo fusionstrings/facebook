@@ -108,7 +108,8 @@ var buildDom = function(searchresult) {
             page.setAttribute('class', 'col-md-6 media');
             var innerHtml = '<a class="pull-left" href="//facebook.com/' + arrData[i].id + '"><img class="media-object" id="page-picture-' + arrData[i].id + '" /></a>' +
                 '<h4><a href="//facebook.com/' + arrData[i].id + '">' + arrData[i].name + '</a></h4>' +
-                '<button class="btn btn-default btn-xs" type="button" onclick="getDetail(' + arrData[i].id + ', this)"><span class="glyphicon glyphicon-plus"></span> Know more</button>';
+                '<p><strong>' + arrData[i].category + '</strong></p>' +
+                '<p><button class="btn btn-default btn-xs" type="button" onclick="getDetail(' + arrData[i].id + ', this)"><span class="glyphicon glyphicon-plus"></span> Know more</button></p>';
             page.innerHTML = innerHtml;
             searchResult.appendChild(page);
             spinner.style.display = 'none';
@@ -135,7 +136,6 @@ var getPicture = function(pageId) {
             "width": "100"
         },
         function(response) {
-            console.log("picture" + JSON.stringify(response));
             if (response && !response.error) {
                 /* handle the result */
 
@@ -158,14 +158,20 @@ var getDetail = function(pageId, elem) {
             console.log("details", response);
             var pageArticle = document.getElementById('page-' + pageId);
             var innerHtml = '';
-            if (response.cover.source && response.cover.source !== undefined) {
+            if (response.cover && response.cover !== undefined) {
                 pageArticle.innerHTML = '<p><img src="' + response.cover.source + '" class="img-responsive" alt="' + response.name + '"></p>' + pageArticle.innerHTML;
             }
             if (response.about && response.about !== undefined) {
                 innerHtml += '<p>' + response.about + '</p>';
             }
-            if (response.likes && response.likes !== undefined) {
-                innerHtml += '<p>' + response.likes + '</p>';
+            if (response.description && response.description !== undefined) {
+                innerHtml += '<p>' + response.description + '</p>';
+            }
+            if (response.link && response.link !== undefined) {
+                innerHtml += '<strong> Facebook page: </strong><a href="' + response.link + '">' + response.link + '</a>';
+            }
+            if (response.website && response.website !== undefined) {
+                innerHtml += '<a href="' + response.website + '">' + response.website + '</a>';
             }
             innerHtml += '<fb:like href="https://www.facebook.com/' + pageId + '" layout="standard" action="like" show_faces="false" share="false"></fb:like>';
             pageArticle.innerHTML += innerHtml;
