@@ -73,22 +73,22 @@ var checkLoginStatus = function(response) {
     }
 }
 
+
+var sortByName = function(a, b) {
+    var x = a.name.toLowerCase();
+    var y = b.name.toLowerCase();
+    return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+}
 var find = function() {
     spinner.style.display = '';
 
     searchResult.innerHTML = '';
     var searchterm = document.getElementById('searchtext').value;
 
-    function sortByName(a, b) {
-        var x = a.name.toLowerCase();
-        var y = b.name.toLowerCase();
-        return ((x > y) ? -1 : ((x < y) ? 1 : 0));
-    }
-
     FB.api('/search', {
         'q': searchterm,
         'type': 'page',
-        'limit': 25,
+        'limit': 30,
         'access_token': ''
     }, function(response) {
         console.log(response);
@@ -102,10 +102,11 @@ var buildDom = function(searchresult) {
     if (arrData.length > 0) {
         for (var i = 0, len = arrData.length; i < len; i++) {
             //console.log('(arrData[i])', (arrData[i]));
+            getPicture(arrData[i].id);
             var page = document.createElement('article');
-            page.setAttribute('id', 'page_' + arrData[i].id);
-            page.setAttribute('class', 'col-md-4 media');
-            var innerHtml = '<a class="pull-left" href="//facebook.com/' + arrData[i].id + '"><img class="media-object" src="' + getPicture(arrData[i].id) + '" /></a>' +
+            page.setAttribute('id', 'page-' + arrData[i].id);
+            page.setAttribute('class', 'col-md-6 media');
+            var innerHtml = '<a class="pull-left" href="//facebook.com/' + arrData[i].id + '"><img class="media-object" id="page-picture-' + arrData[i].id + '" /></a>' +
                 '<h4><a href="//facebook.com/' + arrData[i].id + '">' + arrData[i].name + '</a></h4>' +
                 '<button class="btn btn-default btn-xs" type="button" onclick="getDetail(' + arrData[i].id + ', this)"><span class="glyphicon glyphicon-plus"></span> Know more</button>';
             page.innerHTML = innerHtml;
@@ -113,31 +114,34 @@ var buildDom = function(searchresult) {
             spinner.style.display = 'none';
             searchResult.style.display = '';
         }
+
+        searchResult.innerHTML += '<ul class="pager">' +
+            '<li class="previous disabled"><a href="#">&larr; Older</a></li>' +
+            '<li class="next"><a href="#">Newer &rarr;</a></li>' +
+            '</ul>';
     } else {
         searchResult.innerHTML = '<strong>No matching results found...</strong>';
         spinner.style.display = 'none';
         searchResult.style.display = '';
     }
-
-    page.innerHTML += '<ul class="pager">' +
-        '<li class="previous disabled"><a href="#">&larr; Older</a></li>' +
-        '<li class="next"><a href="#">Newer &rarr;</a></li>' +
-        '</ul>';
 }
 
 var getPicture = function(pageId) {
     FB.api(
         "/" + pageId + "/picture", {
             "redirect": false,
-            "height": "200",
-            "type": "normal",
-            "width": "200"
+            "height": "100",
+            "type": "square",
+            "width": "100"
         },
         function(response) {
             console.log("picture" + JSON.stringify(response));
             if (response && !response.error) {
                 /* handle the result */
-                return response.data.url;
+
+                var pagePicture = document.getElementById('page-picture-' + pageId);
+
+                pagePicture.setAttribute('src', response.data.url);
             }
         }
     );
@@ -152,8 +156,11 @@ var getDetail = function(pageId, elem) {
             elem.style.display = 'none';
             /* handle the result */
             console.log("details", response);
-            var pageArticle = document.getElementById('page_' + pageId);
+            var pageArticle = document.getElementById('page-' + pageId);
             var innerHtml = '';
+            if (response.cover.source && response.cover.source !== undefined) {
+                pageArticle.innerHTML = '<p><img src="' + response.cover.source + '" class="img-responsive" alt="' + response.name + '"></p>' + pageArticle.innerHTML;
+            }
             if (response.about && response.about !== undefined) {
                 innerHtml += '<p>' + response.about + '</p>';
             }
