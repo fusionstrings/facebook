@@ -236,7 +236,7 @@ var getDetail = function(pageId, elem) {
                 innerHtml += '<p><strong>Description: </strong>' + response.description + '</p>';
             }
             if (response.talking_about_count && response.talking_about_count !== undefined) {
-                innerHtml += '<p><strong>Peopel talking about: </strong>' + response.talking_about_count + '</p>';
+                innerHtml += '<p><strong>People talking about: </strong>' + response.talking_about_count + '</p>';
             }
             if (response.band_members && response.band_members !== undefined) {
                 innerHtml += '<p><strong>Band members: </strong>' + response.band_members + '</p>';
