@@ -259,7 +259,7 @@ var getDetail = function(pageId, elem) {
                 };
                 innerHtml += '</p>';
             }
-            innerHtml += '<fb:like href="https://www.facebook.com/' + pageId + '" layout="standard" action="like" show_faces="false" share="false"></fb:like>';
+            innerHtml += '<fb:like href="https://www.facebook.com/' + pageId + '" layout="standard" action="like" show_faces="false" share="false"></fb:like><hr />';
             pageArticle.innerHTML += innerHtml;
             FB.XFBML.parse(pageArticle);
         }
